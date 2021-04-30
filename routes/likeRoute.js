@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/topic/:id");
-router.get("/:id");
+router.get("/topic/:topicId");
 router.post("/");
 router.delete("/:id");
 
