@@ -96,6 +96,70 @@ exports.register = async (req, res, next) => {
   }
 };
 
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const loginUser = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!loginUser) {
+      return res.status(400).json({ message: "email or password incorrect" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, loginUser.password);
+    if (!isPasswordMatch) {
+      return res.status(400).json({ message: "email or password incorrect" });
+    }
+
+    const payload = {
+      id: loginUser.id,
+      username: loginUser.username,
+      email: loginUser.email,
+      userImg: loginUser.userImg,
+      birthDate: loginUser.birthDate,
+      userRole: loginUser.userRole,
+      userStatus: loginUser.userStatus,
+    };
+    const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+      expiresIn: +process.env.JWT_EXPIRES_IN,
+    });
+    return res.status(200).json({ token: token });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.protect = async (req, res, next) => {
+  try {
+    let token = null;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    if (!token)
+      return res.status(401).json({ message: "you are unauthorized" });
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const user = await User.findOne({
+      where: {
+        id: payload.id,
+      },
+    });
+    if (!user) return res.status(401).json({ message: "user not found" });
+
+    req.user = user;
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
 router.get("/me");
 router.patch("/me/update");
 router.patch("/me/password");
