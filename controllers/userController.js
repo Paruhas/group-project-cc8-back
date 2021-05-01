@@ -86,7 +86,7 @@ exports.register = async (req, res, next) => {
       userRole: newUser.userRole,
       userStatus: newUser.userStatus,
     };
-    const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+    const token = await jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: +process.env.JWT_EXPIRES_IN,
     });
 
@@ -94,7 +94,7 @@ exports.register = async (req, res, next) => {
     res.status(201).json({ token });
   } catch (err) {
     await transaction.rollback();
-    next();
+    next(err);
   }
 };
 
@@ -126,7 +126,7 @@ exports.login = async (req, res, next) => {
       userRole: loginUser.userRole,
       userStatus: loginUser.userStatus,
     };
-    const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+    const token = await jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: +process.env.JWT_EXPIRES_IN,
     });
     return res.status(200).json({ token: token });
@@ -147,7 +147,7 @@ exports.protectAdmin = async (req, res, next) => {
     if (!token)
       return res.status(401).json({ message: "you are unauthorized" });
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({
       where: {
         id: payload.id,
@@ -176,7 +176,7 @@ exports.protectUser = async (req, res, next) => {
     if (!token)
       return res.status(401).json({ message: "you are unauthorized" });
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({
       where: {
         id: payload.id,
