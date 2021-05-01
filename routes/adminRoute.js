@@ -8,6 +8,7 @@ const topicRoute = require("./topicRoute");
 router.get("/me");
 router.patch("/me/update");
 router.patch("/me/password");
+router.patch("/me/delete");
 router.get("/user");
 router.get("/user/:id");
 router.patch("/user/status/:id");
