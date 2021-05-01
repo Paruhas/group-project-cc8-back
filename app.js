@@ -11,8 +11,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
-app.post("/login");
-app.post("/register");
+const userController = require("./controllers/userController");
+app.post("/login", userController.login);
+app.post("/register", userController.register);
 
 app.use("/admin", adminRoute);
 app.use("/user", userRoute);

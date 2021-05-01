@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "Aa123456",
+    "password": "admin1234",
     "database": "showcase_webboard",
     "host": "127.0.0.1",
     "dialect": "mysql"
