@@ -53,6 +53,15 @@ exports.register = async (req, res, next) => {
       throw new AppError(400, "this email have already taken");
     }
 
+    const checkedDuplicateUsername = await User.findOne({
+      where: {
+        username: username,
+      },
+    });
+    if (checkedDuplicateUsername) {
+      throw new AppError(400, "Username is duplicated");
+    }
+
     const hashPassword = await bcrypt.hash(password, +process.env.BCRYPT_SALT);
     const newUser = await User.create(
       {
