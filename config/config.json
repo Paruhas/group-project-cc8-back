@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "themm003",
-    "database": "showcase-webboard",
+    "database": "showcase_webboard",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
