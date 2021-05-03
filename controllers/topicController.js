@@ -50,6 +50,7 @@ exports.getLastedTopicsActive = async (req, res, next) => {
         topicStatus: "ACTIVE",
       },
       limit: 4,
+      order: [["created_at", "DESC"]],
     });
 
     if (!topicsLasted) {
