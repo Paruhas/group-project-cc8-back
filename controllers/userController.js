@@ -135,6 +135,7 @@ exports.login = async (req, res, next) => {
   }
 };
 
+// อาาจะไม่ได้ใช้ ถ้าเราเปลี่ยนไปใช้ passport แทน
 exports.protectAdmin = async (req, res, next) => {
   try {
     let token = null;
@@ -296,25 +297,25 @@ exports.deleteMe = async (req, res, next) => {
   }
 };
 exports.getUser = async (req, res, next) => {
-try {
-  const user = await User.findAll();
-  res.status(200).json({ user });
-} catch (err) {
-  next(err)
-}
+  try {
+    const user = await User.findAll();
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
 };
 exports.getUserById = async (req, res, next) => {
   try {
-     const getUserById = await User.findByPk(req.params.id);
-     res.status(200).json({ getUserById });
+    const getUserById = await User.findByPk(req.params.id);
+    res.status(200).json({ getUserById });
   } catch (err) {
     next(err);
   }
 };
 exports.editUserStatus = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const { userStatus } = req.body
+    const { id } = req.params;
+    const { userStatus } = req.body;
     await User.update({ userStatus: userStatus }, { where: { id } });
     res.status(200).json({ editStatus });
   } catch (err) {
