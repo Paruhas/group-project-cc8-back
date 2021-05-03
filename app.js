@@ -6,6 +6,7 @@ const { sequelize } = require("./models");
 const errorMiddleware = require("./middlewares/error");
 const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
+const roomRoute = require("./routes/roomRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -158,6 +159,7 @@ app.post("/register", userController.register);
 
 app.use("/admin", adminRoute);
 app.use("/user", userRoute);
+app.use("/room", roomRoute);
 
 app.use((req, res, next) => {
   res.status(400).json({ message: "Path not found." });
