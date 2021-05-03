@@ -124,6 +124,9 @@ exports.getLastedTopicsActive = async (req, res, next) => {
 exports.getHotTopicsActive = async (req, res, next) => {
   try {
     const topicsHot = await Like.findAll({
+      where: {
+        topicStatus: "ACTIVE",
+      },
       attributes: [
         "topic_id",
         [sequelize.fn("COUNT", "topic_id"), "totalLikes"],
