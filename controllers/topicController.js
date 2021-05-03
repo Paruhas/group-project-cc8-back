@@ -1,4 +1,4 @@
-const { Topic } = require("../models");
+const { sequelize, Topic, Like } = require("../models");
 
 exports.getAllTopics = async (req, res, next) => {
   try {
@@ -116,6 +116,30 @@ exports.getLastedTopicsActive = async (req, res, next) => {
     }
 
     res.status(200).json({ topicsLasted });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getHotTopicsActive = async (req, res, next) => {
+  try {
+    const topicsHot = await Like.findAll({
+      attributes: [
+        "topic_id",
+        [sequelize.fn("COUNT", "topic_id"), "totalLikes"],
+      ],
+      group: ["topic_id"],
+      order: [[sequelize.literal("totalLikes"), "DESC"]],
+      limit: 4,
+    });
+
+    if (!topicsHot) {
+      return res.status(400).json({
+        message: "topicsHot not found ; or not have active status",
+      });
+    }
+
+    res.status(200).json({ topicsHot });
   } catch (err) {
     next(err);
   }

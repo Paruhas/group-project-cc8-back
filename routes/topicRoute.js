@@ -5,7 +5,7 @@ const topicController = require("../controllers/topicController");
 router.get("/", topicController.getAllTopicsActive);
 router.get("/by-id/:id", topicController.getTopicByIdActive);
 router.get("/latest-topic", topicController.getLastedTopicsActive);
-router.get("/hot-topic");
+router.get("/hot-topic", topicController.getHotTopicsActive);
 router.get("/room/:roomId");
 router.get("/user/:userId");
 router.post("/");
