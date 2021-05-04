@@ -186,5 +186,8 @@ exports.getHotTopicsActive = async (req, res, next) => {
     next(err);
   }
 };
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 8784195d5c08df22f997a89861eb6b72c9201e27
