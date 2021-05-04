@@ -5,6 +5,7 @@ const likeRoute = require("./likeRoute");
 const pinRoute = require("./pinRoute");
 const topicRoute = require("./topicRoute");
 const admin = require("../controllers/userController");
+const topicController = require("../controllers/topicController");
 
 router.get("/me");
 router.patch("/me/update");
@@ -19,9 +20,9 @@ router.use("/topics", topicRoute);
 router.use("/likes", likeRoute);
 router.use("/pins", pinRoute);
 
-router.get("/topics/inactive");
-router.get("/topics/inactive/:id");
-router.patch("/topics/active-inactive/:id");
+router.get("/topics/inactive", topicController.getAllTopicsInactive);
+router.get("/topics/inactive/:id", topicController.getTopicByIdInactive);
+router.patch("/topics/active-inactive/:id", topicController.updateTopicStatus);
 
 router.get("/report");
 router.get("/report/:id");
