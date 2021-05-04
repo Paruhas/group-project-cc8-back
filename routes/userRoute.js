@@ -5,6 +5,9 @@ const likeRoute = require("./likeRoute");
 const pinRoute = require("./pinRoute");
 const topicRoute = require("./topicRoute");
 
+const passport = require("passport");
+const protectMiddleware = passport.authenticate("jwt", { session: false });
+
 router.get("/me");
 router.patch("/me/update");
 router.patch("/me/password");
