@@ -96,19 +96,6 @@ exports.updateTopic = async (req, res, next) => {
   }
 };
 
-exports.deleteTopic = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const topic = await Topic.findAll({ where: { id } });
-    if (!topic) return res.status(400).json({ message: "Topic not found." });
-    if (+topic.userId !== +req.user.id)
-      ({ message: "Cannot delete other's topic." });
-    await Topic.update({ roomStatus: "INACTIVE" }, { where: { id } });
-    res.status(201).json({ message: `Topic id ${id} is deleted successfully` });
-  } catch (err) {
-    next(err);
-  }
-};
 exports.getTopicByIdActive = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -182,6 +169,20 @@ exports.getHotTopicsActive = async (req, res, next) => {
     }
 
     res.status(200).json({ topicsHot });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteTopic = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const topic = await Topic.findAll({ where: { id } });
+    if (!topic) return res.status(400).json({ message: "Topic not found." });
+    if (+topic.userId !== +req.user.id)
+      ({ message: "Cannot delete other's topic." });
+    await Topic.update({ roomStatus: "INACTIVE" }, { where: { id } });
+    res.status(201).json({ message: `Topic id ${id} is deleted successfully` });
   } catch (err) {
     next(err);
   }
