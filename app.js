@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./middlewares/passport");
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -8,6 +9,7 @@ const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
 const roomRoute = require("./routes/roomRoute");
 const topicRoute = require("./routes/topicRoute");
+const pinRoute = require("./routes/pinRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -162,6 +164,7 @@ app.use("/admin", adminRoute);
 app.use("/user", userRoute);
 app.use("/room", roomRoute);
 app.use("/topic", topicRoute);
+app.use("/pin", pinRoute);
 
 app.use((req, res, next) => {
   res.status(400).json({ message: "Path not found." });
