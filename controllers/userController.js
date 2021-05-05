@@ -185,8 +185,8 @@ exports.protectUser = async (req, res, next) => {
     });
     if (!user) return res.status(401).json({ message: "user not found" });
 
-    if (user.userRole !== "USER")
-      return res.status(400).json({ message: "You are unauthorized" });
+    // if (user.userRole !== "USER")
+    //   return res.status(400).json({ message: "You are unauthorized" });
 
     req.user = user;
     next();

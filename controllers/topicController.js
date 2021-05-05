@@ -246,7 +246,6 @@ exports.updateTopicStatus = async (req, res, next) => {
           "Topic > can't update this topicStatus ; current topicStatus is same with req.body",
       });
     }
-
     await Topic.update(
       {
         topicStatus: topicStatus,
@@ -271,7 +270,6 @@ exports.updateTopicStatus = async (req, res, next) => {
     next(err);
   }
 };
-
 exports.deleteTopic = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -285,11 +283,10 @@ exports.deleteTopic = async (req, res, next) => {
     next(err);
   }
 };
-
 exports.getToppicByRoomId = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const getToppicByRoomId = await Topic.findAll({ where: { roomId: id } })
+    const getToppicByRoomId = await Topic.findAll({ where: { roomId: id } });
     res.status(200).json({ getToppicByRoomId });
   } catch (err) {
     next(err);
@@ -298,11 +295,7 @@ exports.getToppicByRoomId = async (req, res, next) => {
 exports.getRoomByUserId = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const getToppicByUserId = await Topic.findAll({ where: { userId: id } })
+    const getToppicByUserId = await Topic.findAll({ where: { userId: id } });
     res.status(200).json({ getToppicByUserId });
-  } catch (err) {
-    
-  }
-}
-
-
+  } catch (err) {}
+};

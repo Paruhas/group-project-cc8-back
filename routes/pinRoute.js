@@ -1,12 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const pinController = require("../controllers/pinController");
+const userController = require("../controllers/userController");
 
-const passport = require("passport");
-const auntMiddleware = passport.authenticate("jwt", { session: false });
+// const passport = require("../middlewares/passport");
+// const auntMiddleware = passport.authenticate("jwt", { session: false });
 
-router.get("/user/:userId", pinController.getAllPinActiveByUserId);
-router.post("/", auntMiddleware, pinController.createPin);
-router.delete("/:id", auntMiddleware, pinController.deletePin);
+router.get(
+  "/user/:userId",
+  userController.protectUser,
+  pinController.getAllPinActiveByUserId
+);
+router.post("/", userController.protectUser, pinController.createPin);
+router.delete("/:id", userController.protectUser, pinController.deletePin);
 
 module.exports = router;

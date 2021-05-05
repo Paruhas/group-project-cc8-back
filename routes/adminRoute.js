@@ -9,31 +9,83 @@ const topicController = require("../controllers/topicController");
 const userController = require("../controllers/userController");
 const roomController = require("../controllers/roomController");
 
-router.get("/me", userController.getMe);
-router.patch("/me/update", userController.updateMe);
-router.patch("/me/password", userController.editMyPassword);
-router.patch("/me/delete", userController.deleteMe);
-router.get("/user", userController.getAllUser);
-router.get("/user/:id", userController.getUserById);
-router.patch("/user/status/:id", userController.editUserStatus);
+router.get("/me", userController.protectAdmin, userController.getMe);
+router.patch(
+  "/me/update",
+  userController.protectAdmin,
+  userController.updateMe
+);
+router.patch(
+  "/me/password",
+  userController.protectAdmin,
+  userController.editMyPassword
+);
+router.patch(
+  "/me/delete",
+  userController.protectAdmin,
+  userController.deleteMe
+);
+router.get("/user", userController.protectAdmin, userController.getAllUser);
+router.get(
+  "/user/:id",
+  userController.protectAdmin,
+  userController.getUserById
+);
+router.patch(
+  "/user/status/:id",
+  userController.protectAdmin,
+  userController.editUserStatus
+);
 
 router.use("/rooms", roomRoute);
 router.use("/topics", topicRoute);
 router.use("/likes", likeRoute);
 router.use("/pins", pinRoute);
 
-router.get("/rooms/", roomController.getAllRooms);
-router.get("/rooms/:id", roomController.getRoomById);
-router.post("/", roomController.createRoom);
-router.patch("/:id", roomController.updateRoom);
+router.get("/rooms/", userController.protectAdmin, roomController.getAllRooms);
+router.get(
+  "/rooms/:id",
+  userController.protectAdmin,
+  roomController.getRoomById
+);
+router.post("/", userController.protectAdmin, roomController.createRoom);
+router.patch("/:id", userController.protectAdmin, roomController.updateRoom);
 
-router.get("/topics/inactive", topicController.getAllTopicsInactive);
-router.get("/topics/inactive/:id", topicController.getTopicByIdInactive);
-router.patch("/topics/active-inactive/:id", topicController.updateTopicStatus);
+router.get(
+  "/topics/inactive",
+  userController.protectAdmin,
+  topicController.getAllTopicsInactive
+);
+router.get(
+  "/topics/inactive/:id",
+  userController.protectAdmin,
+  topicController.getTopicByIdInactive
+);
+router.patch(
+  "/topics/active-inactive/:id",
+  userController.protectAdmin,
+  topicController.updateTopicStatus
+);
 
-router.get("/report", reportController.getAllReports);
-router.get("/report/:id", reportController.getReportById);
-router.post("/report/", reportController.createReport);
-router.patch("/report/status/:id", reportController.updateReportStatus);
+router.get(
+  "/report",
+  userController.protectAdmin,
+  reportController.getAllReports
+);
+router.get(
+  "/report/:id",
+  userController.protectAdmin,
+  reportController.getReportById
+);
+router.post(
+  "/report/",
+  userController.protectAdmin,
+  reportController.createReport
+);
+router.patch(
+  "/report/status/:id",
+  userController.protectAdmin,
+  reportController.updateReportStatus
+);
 
 module.exports = router;
