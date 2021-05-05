@@ -286,9 +286,11 @@ exports.editMyPassword = async (req, res, next) => {
 };
 exports.deleteMe = async (req, res, next) => {
   try {
-    const { id, userStatus } = req.user;
+    const { id, userRole, userStatus } = req.user;
     if (userStatus === "INACTIVE")
       return res.status(400).json({ message: "This user has been deleted" });
+    if (userRole === "ADMIN")
+      return res.status(400).json({ message: "Cannot delelte admin." });
 
     await User.update({ userStatus: "INACTIVE" }, { where: { id } });
     res.status(200).json({ message: "This user is deleted successfully" });
@@ -296,7 +298,7 @@ exports.deleteMe = async (req, res, next) => {
     next(err);
   }
 };
-exports.getUser = async (req, res, next) => {
+exports.getAllUser = async (req, res, next) => {
   try {
     const user = await User.findAll();
     res.status(200).json({ user });

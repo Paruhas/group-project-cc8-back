@@ -2,9 +2,7 @@ const express = require("express");
 const router = express.Router();
 const roomController = require("../controllers/roomController");
 
-router.get("/", roomController.getAllRooms);
-router.get("/:id", roomController.getRoomById);
-router.post("/");
-router.patch("/:id");
+router.get("/active", roomController.getAllActiveRooms);
+router.get("/active/:id", roomController.getActiveRoomById);
 
 module.exports = router;
