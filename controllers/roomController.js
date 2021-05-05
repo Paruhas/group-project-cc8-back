@@ -25,7 +25,7 @@ exports.getRoomById = async (req, res, next) => {
   }
 };
 
-exports.getAllRoomsActive = async (req, res, next) => {
+exports.getAllActiveRooms = async (req, res, next) => {
   try {
     const rooms = await Room.findAll({
       where: {
@@ -45,7 +45,7 @@ exports.getAllRoomsActive = async (req, res, next) => {
   }
 };
 
-exports.getRoomByIdActive = async (req, res, next) => {
+exports.getActiveRoomById = async (req, res, next) => {
   try {
     const { id } = req.params;
 

@@ -247,7 +247,6 @@ exports.updateTopicStatus = async (req, res, next) => {
           "Topic > can't update this topicStatus ; current topicStatus is same with req.body",
       });
     }
-
     await Topic.update(
       {
         topicStatus: topicStatus,
@@ -272,7 +271,6 @@ exports.updateTopicStatus = async (req, res, next) => {
     next(err);
   }
 };
-
 exports.deleteTopic = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -286,11 +284,10 @@ exports.deleteTopic = async (req, res, next) => {
     next(err);
   }
 };
-
 exports.getToppicByRoomId = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const getToppicByRoomId = await Topic.findAll({ where: { roomId: id } })
+    const getToppicByRoomId = await Topic.findAll({ where: { roomId: id } });
     res.status(200).json({ getToppicByRoomId });
   } catch (err) {
     next(err);
@@ -299,14 +296,11 @@ exports.getToppicByRoomId = async (req, res, next) => {
 exports.getRoomByUserId = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const getToppicByUserId = await Topic.findAll({ where: { userId: id } })
+    const getToppicByUserId = await Topic.findAll({ where: { userId: id } });
     res.status(200).json({ getToppicByUserId });
-  } catch (err) {
-    
-  }
-}
-
-exports.createToppic = async (req, res, next) => {
+  } catch (err) {}
+};
+exports.createTopic = async (req, res, next) => {
   try {
     const { topicName, topicContent, topicImg, roomId } = req.body;
     const newTopic = await Topic.create({
@@ -315,18 +309,17 @@ exports.createToppic = async (req, res, next) => {
       topicImg,
       topicStatus: "ACTIVE",
       roomId,
-      userId:req.user.id
+      userId: req.user.id,
     });
     if (!topicName)
       return res.status(400).json({ message: "Topic name is required " });
     if (!topicContent)
-      return res.status(400).json({ message: "Topic content name is required " });
-    if (!roomId)
-      return res.status(400).json({ message: "please tag roomid" });
-     res.status(200).json({ newTopic });
+      return res
+        .status(400)
+        .json({ message: "Topic content name is required " });
+    if (!roomId) return res.status(400).json({ message: "please tag roomid" });
+    res.status(200).json({ newTopic });
   } catch (err) {
     next(err);
   }
-}
-
-
+};
