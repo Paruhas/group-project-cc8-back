@@ -1,5 +1,6 @@
 const { sequelize, Topic, Like } = require("../models");
 
+
 exports.getAllTopics = async (req, res, next) => {
   try {
     const topics = await Topic.findAll({
@@ -302,6 +303,29 @@ exports.getRoomByUserId = async (req, res, next) => {
     res.status(200).json({ getToppicByUserId });
   } catch (err) {
     
+  }
+}
+
+exports.createToppic = async (req, res, next) => {
+  try {
+    const { topicName, topicContent, topicImg, roomId } = req.body;
+    const newTopic = await Topic.create({
+      topicName,
+      topicContent,
+      topicImg,
+      topicStatus: "ACTIVE",
+      roomId,
+      userId:req.user.id
+    });
+    if (!topicName)
+      return res.status(400).json({ message: "Topic name is required " });
+    if (!topicContent)
+      return res.status(400).json({ message: "Topic content name is required " });
+    if (!roomId)
+      return res.status(400).json({ message: "please tag roomid" });
+     res.status(200).json({ newTopic });
+  } catch (err) {
+    next(err);
   }
 }
 
