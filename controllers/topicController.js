@@ -311,13 +311,17 @@ exports.createTopic = async (req, res, next) => {
       roomId,
       userId: req.user.id,
     });
+    
+    
     if (!topicName)
       return res.status(400).json({ message: "Topic name is required " });
+    
     if (!topicContent)
       return res
         .status(400)
         .json({ message: "Topic content name is required " });
     if (!roomId) return res.status(400).json({ message: "please tag roomid" });
+
     res.status(200).json({ newTopic });
   } catch (err) {
     next(err);
