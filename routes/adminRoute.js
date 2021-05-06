@@ -4,6 +4,7 @@ const roomRoute = require("./roomRoute");
 const likeRoute = require("./likeRoute");
 const pinRoute = require("./pinRoute");
 const topicRoute = require("./topicRoute");
+const commentRoute = require("./commentRoute");
 const reportController = require("../controllers/reportController");
 const topicController = require("../controllers/topicController");
 const userController = require("../controllers/userController");
@@ -41,6 +42,7 @@ router.use("/rooms", roomRoute);
 router.use("/topics", topicRoute);
 router.use("/likes", likeRoute);
 router.use("/pins", pinRoute);
+router.use("/comments", commentRoute);
 
 router.get("/rooms/", userController.protectAdmin, roomController.getAllRooms);
 router.get(
