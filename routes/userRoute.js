@@ -5,7 +5,7 @@ const likeRoute = require("./likeRoute");
 const pinRoute = require("./pinRoute");
 const topicRoute = require("./topicRoute");
 const reportController = require("../controllers/reportController");
-const roomController = require("../controllers/roomController");
+const userController = require("../controllers/userController");
 
 // const passport = require("passport");
 // const protectMiddleware = passport.authenticate("jwt", { session: false });

@@ -77,6 +77,14 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: "RESTRICT",
       onDelete: "RESTRICT",
     });
+    User.hasMany(models.Comment, {
+      foreignKey: {
+        name: "userId",
+        allowNull: "false",
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
   };
   return User;
 };
