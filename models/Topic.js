@@ -49,6 +49,14 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: "RESTRICT",
       onDelete: "RESTRICT",
     });
+    Topic.hasMany(models.Comment, {
+      foreignKey: {
+        name: "topicId",
+        allowNull: false,
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
     Topic.belongsTo(models.User, {
       foreignKey: {
         name: "userId",
