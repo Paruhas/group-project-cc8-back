@@ -1,21 +1,20 @@
-const { sequelize, Topic, Like } = require("../models");
+const { sequelize, Topic, Like, Room } = require("../models");
 
+// exports.getAllTopics = async (req, res, next) => {
+//   try {
+//     const topics = await Topic.findAll({
+//       where: {},
+//     });
 
-exports.getAllTopics = async (req, res, next) => {
-  try {
-    const topics = await Topic.findAll({
-      where: {},
-    });
+//     if (!topics) {
+//       return res.status(400).json({ message: "topics not found" });
+//     }
 
-    if (!topics) {
-      return res.status(400).json({ message: "topics not found" });
-    }
-
-    res.status(200).json({ topics });
-  } catch (err) {
-    next(err);
-  }
-};
+//     res.status(200).json({ topics });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 exports.getTopicById = async (req, res, next) => {
   try {
@@ -32,6 +31,26 @@ exports.getTopicById = async (req, res, next) => {
     }
 
     res.status(200).json({ topic });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getTopicByUserId = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+
+    const topics = await Topic.findOne({
+      where: {
+        userId: id,
+      },
+    });
+
+    if (!topic) {
+      return res.status(400).json({ message: "Topic not found" });
+    }
+
+    res.status(200).json({ topics });
   } catch (err) {
     next(err);
   }
@@ -205,10 +224,12 @@ exports.updateTopic = async (req, res, next) => {
 
     const topic = await Topic.findOne({ where: { id } });
     if (!topic) return res.status(400).json({ message: "Topic not found." });
-    if (+topic.userId !== +req.user.id)
-      ({ message: "Cannot edit other's topic." });
-    const room = await Room.findOne({ where: { id: roomId } });
-    if (!room) return res.status(400).json({ message: "Room not found." });
+    if (topic.userId !== req.user.id)
+      return res.status(400).json({ message: "Cannot edit other's topic." });
+    if (roomId) {
+      const room = await Room.findOne({ where: { id: roomId } });
+      if (!room) return res.status(400).json({ message: "Room not found." });
+    }
     await Topic.update(
       { topicName, topicContent, topicImg, roomId },
       { where: { id } }
@@ -219,7 +240,7 @@ exports.updateTopic = async (req, res, next) => {
   }
 };
 
-exports.updateTopicStatus = async (req, res, next) => {
+exports.updateTopicStatusByAdmin = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { topicStatus } = req.body;
@@ -229,9 +250,7 @@ exports.updateTopicStatus = async (req, res, next) => {
     });
 
     if (!topic) {
-      return res
-        .status(400)
-        .json({ message: "Topic > updateTopicStatus not found." });
+      return res.status(400).json({ message: "Topic not found." });
     }
 
     const IsTopicHasThisStatus = await Topic.findOne({
@@ -243,8 +262,7 @@ exports.updateTopicStatus = async (req, res, next) => {
 
     if (IsTopicHasThisStatus) {
       return res.status(400).json({
-        message:
-          "Topic > can't update this topicStatus ; current topicStatus is same with req.body",
+        message: "Topic not change",
       });
     }
     await Topic.update(
@@ -271,19 +289,68 @@ exports.updateTopicStatus = async (req, res, next) => {
     next(err);
   }
 };
-exports.deleteTopic = async (req, res, next) => {
+exports.updateTopicStatusByUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const topic = await Topic.findAll({ where: { id } });
-    if (!topic) return res.status(400).json({ message: "Topic not found." });
-    if (+topic.userId !== +req.user.id)
-      ({ message: "Cannot delete other's topic." });
-    await Topic.update({ roomStatus: "INACTIVE" }, { where: { id } });
-    res.status(201).json({ message: `Topic id ${id} is deleted successfully` });
+    const { topicStatus } = req.body;
+
+    const topic = await Topic.findOne({
+      where: { id, userId: req.user.id },
+    });
+
+    if (!topic) {
+      return res.status(400).json({ message: "Topic not found." });
+    }
+
+    const IsTopicHasThisStatus = await Topic.findOne({
+      where: {
+        id,
+        topicStatus: topicStatus,
+      },
+    });
+
+    if (IsTopicHasThisStatus) {
+      return res.status(400).json({
+        message: "Topic not change",
+      });
+    }
+    await Topic.update(
+      {
+        topicStatus: topicStatus,
+      },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    res
+      .status(200)
+      .json({ message: `Topic id ${id}'s topicStatus updated successfully` });
   } catch (err) {
+    if (err.name) {
+      return res.status(500).json({
+        message:
+          "SequelizeDatabaseError: topicStatus's value must be 'ACTIVE' or 'INACTIVE'",
+      });
+    }
     next(err);
   }
 };
+// exports.deleteTopic = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const topic = await Topic.findAll({ where: { id } });
+//     if (!topic) return res.status(400).json({ message: "Topic not found." });
+//     if (+topic.userId !== +req.user.id)
+//       ({ message: "Cannot delete other's topic." });
+//     await Topic.update({ roomStatus: "INACTIVE" }, { where: { id } });
+//     res.status(201).json({ message: `Topic id ${id} is deleted successfully` });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 exports.getToppicByRoomId = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -307,7 +374,6 @@ exports.createTopic = async (req, res, next) => {
       topicName,
       topicContent,
       topicImg,
-      topicStatus: "ACTIVE",
       roomId,
       userId: req.user.id,
     });
@@ -317,7 +383,7 @@ exports.createTopic = async (req, res, next) => {
       return res
         .status(400)
         .json({ message: "Topic content name is required " });
-    if (!roomId) return res.status(400).json({ message: "please tag roomid" });
+    if (!roomId) return res.status(400).json({ message: "please tag roomId" });
     res.status(200).json({ newTopic });
   } catch (err) {
     next(err);

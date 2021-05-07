@@ -7,11 +7,11 @@ router.get(
   "/active",
   userController.protectUser,
   roomController.getAllActiveRooms
-);
+); //
 router.get(
   "/active/:id",
   userController.protectUser,
   roomController.getActiveRoomById
-);
+); //
 
 module.exports = router;

@@ -29,12 +29,12 @@ router.get(
   userController.protectUser,
   topicController.getRoomByUserId
 );
-router.post("/", userController.protectUser,topicController.createTopic);
-router.patch("/:id", userController.protectUser, topicController.updateTopic);
+router.post("/", userController.protectUser, topicController.createTopic); //
+router.patch("/:id", userController.protectUser, topicController.updateTopic); //
 router.patch(
   "/inactive/:id",
   userController.protectUser,
-  topicController.updateTopicStatus
-);
+  topicController.updateTopicStatusByUser
+); //
 
 module.exports = router;

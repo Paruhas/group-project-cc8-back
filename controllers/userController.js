@@ -4,7 +4,7 @@ const { User, sequelize } = require("../models");
 const AppError = require("../utils/AppError");
 
 const isEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const isPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/;
+const isPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
 
 exports.register = async (req, res, next) => {
   const transaction = await sequelize.transaction();
@@ -21,6 +21,9 @@ exports.register = async (req, res, next) => {
     // validation
     if (!username || !username.trim()) {
       throw new AppError(400, "username is required");
+    }
+    if (!isEmail) {
+      throw new AppError(400, "Email is required.");
     }
     if (!isEmail.test(email)) {
       throw new AppError(400, "this email is invalid format");
@@ -108,10 +111,13 @@ exports.login = async (req, res, next) => {
       },
     });
 
-    if (!loginUser) {
+    if (!loginUser)
       return res.status(400).json({ message: "email or password incorrect" });
-    }
 
+    if (loginUser.userStatus === "INACTIVE")
+      return res.status(400).json({ message: "This user was deleted." });
+    if (loginUser.userStatus === "BANNED")
+      return res.status(400).json({ message: "This user has been banned." });
     const isPasswordMatch = await bcrypt.compare(password, loginUser.password);
     if (!isPasswordMatch) {
       return res.status(400).json({ message: "email or password incorrect" });
@@ -259,12 +265,13 @@ exports.updateMe = async (req, res, next) => {
 exports.editMyPassword = async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { newPassword, confirmNewPassword } = req.body;
-    if (newPassword !== confirmNewPassword)
+    const { password, confirmPassword } = req.body;
+    if (password !== confirmPassword)
       return res.status(400).json({ message: "Password is not match" });
 
     const regexPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
-    const isPassword = regexPassword.test(String(newPassword));
+
+    const isPassword = regexPassword.test(password);
     if (!isPassword)
       return res.status(400).json({
         message:
@@ -272,7 +279,7 @@ exports.editMyPassword = async (req, res, next) => {
       });
 
     const hashedPassword = await bcrypt.hash(
-      newPassword,
+      password,
       +process.env.BCRYPT_SALT
     );
 
@@ -300,7 +307,8 @@ exports.deleteMe = async (req, res, next) => {
 };
 exports.getAllUser = async (req, res, next) => {
   try {
-    const user = await User.findAll();
+    const users = await User.findAll();
+    if (!users) return res.status(400).json({ message: "User not found" });
     res.status(200).json({ user });
   } catch (err) {
     next(err);
@@ -308,7 +316,8 @@ exports.getAllUser = async (req, res, next) => {
 };
 exports.getUserById = async (req, res, next) => {
   try {
-    const getUserById = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(400).json({ message: "User not found" });
     res.status(200).json({ getUserById });
   } catch (err) {
     next(err);
@@ -318,8 +327,16 @@ exports.editUserStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { userStatus } = req.body;
+    const user = await User.findOne({ where: { id } });
+    if (!user) return res.status(400).json({ message: "User not found." });
+    if (user.userRole === "ADMIN")
+      return res
+        .status(400)
+        .json({ message: "Cannot change status of admin." });
     await User.update({ userStatus: userStatus }, { where: { id } });
-    res.status(200).json({ editStatus });
+    res
+      .status(200)
+      .json({ message: `User status with ID ${id} is updated successfully.` });
   } catch (err) {
     next(err);
   }

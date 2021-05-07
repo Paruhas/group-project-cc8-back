@@ -26,13 +26,15 @@ app.post("/test-upload", multer.send, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}); //
 
 const userController = require("./controllers/userController");
-app.post("/login", userController.login);
-app.post("/register", userController.register);
+
+app.post("/login", userController.login); //
+app.post("/register", userController.register); //
 
 app.use("/admin", adminRoute);
+
 app.use("/user", userRoute);
 app.use("/room", roomRoute);
 app.use("/topic", topicRoute);
