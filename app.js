@@ -10,6 +10,7 @@ const userRoute = require("./routes/userRoute");
 const roomRoute = require("./routes/roomRoute");
 const topicRoute = require("./routes/topicRoute");
 const pinRoute = require("./routes/pinRoute");
+const likeRoute = require("./routes/likeRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -37,6 +38,8 @@ app.use("/user", userRoute);
 app.use("/room", roomRoute);
 app.use("/topic", topicRoute);
 app.use("/pin", pinRoute);
+app.use("/like", likeRoute)
+app.get('/like',userController.getLike)
 
 app.use((req, res, next) => {
   try {
@@ -48,7 +51,7 @@ app.use((req, res, next) => {
 
 app.use(errorMiddleware);
 
-sequelize.sync({ force: true }).then(() => console.log("DB Sync"));
+// sequelize.sync({ force: true }).then(() => console.log("DB Sync"));
 
 const port = process.env.PORT || 8000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

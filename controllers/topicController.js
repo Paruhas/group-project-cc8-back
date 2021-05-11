@@ -303,14 +303,20 @@ exports.getRoomByUserId = async (req, res, next) => {
 exports.createTopic = async (req, res, next) => {
   try {
     const { topicName, topicContent, topicImg, roomId } = req.body;
-    const newTopic = await Topic.create({
-      topicName,
-      topicContent,
-      topicImg,
-      topicStatus: "ACTIVE",
-      roomId,
-      userId: req.user.id,
-    });
+    if (
+      topicImg.split("/")[1] === "jpeg" ||
+      topicImg.split("/")[1] === "png" ||
+      topicImg.split("/")[1] === "jpg"
+    )
+      return res.status(400).json({message:"Is not img file"})
+      const newTopic = await Topic.create({
+        topicName,
+        topicContent,
+        topicImg,
+        topicStatus: "ACTIVE",
+        roomId,
+        userId: req.user.id,
+      });
     
     
     if (!topicName)

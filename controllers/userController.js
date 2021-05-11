@@ -324,3 +324,9 @@ exports.editUserStatus = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getLike = async (req, res, next) => {
+  const { id } = req.body;
+  const getLike = await User.findAndCountAll({ where: { userStatus: id } });
+  res.status(200).json(getLike.count );
+};
