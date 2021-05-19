@@ -51,7 +51,7 @@ module.exports.send = (req, res, next) => {
 };
 
 module.exports.iconImg100 = (req, res, next) => {
-  return upload.single("userImg")(req, res, () => {
+  return upload.single("roomIcon")(req, res, () => {
     console.log(req.file);
     if (!req.file) {
       return res.json({

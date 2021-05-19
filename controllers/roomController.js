@@ -92,17 +92,23 @@ exports.updateRoom = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { roomName, roomIcon, roomStatus } = req.body;
+
     let name;
+
     const room = await Room.findAll({ where: { id } });
+
     if (!room) return res.status(400).json({ message: "Room not found." });
-    const checkDuplicatRroom = await Room.findAll({ where: { roomName } });
-    if (checkDuplicatRroom.length)
-      return res
-        .status(400)
-        .json({ message: "Room has already been created." });
+
     if (roomName) {
+      const checkDuplicatRroom = await Room.findAll({ where: { roomName } });
+      if (checkDuplicatRroom.length)
+        return res
+          .status(400)
+          .json({ message: "Room has already been created." });
+
       name = roomName.toUpperCase();
     }
+
     await Room.update(
       { roomName: name, roomIcon, roomStatus },
       { where: { id } }

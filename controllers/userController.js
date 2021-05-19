@@ -297,7 +297,7 @@ exports.getAllUser = async (req, res, next) => {
   try {
     const users = await User.findAll();
     if (!users) return res.status(400).json({ message: "User not found" });
-    res.status(200).json({ user });
+    res.status(200).json({ users });
   } catch (err) {
     next(err);
   }
@@ -333,5 +333,5 @@ exports.editUserStatus = async (req, res, next) => {
 exports.getLike = async (req, res, next) => {
   const { id } = req.body;
   const getLike = await User.findAndCountAll({ where: { userStatus: id } });
-  res.status(200).json(getLike.count );
+  res.status(200).json(getLike.count);
 };
