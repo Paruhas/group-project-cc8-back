@@ -1,8 +1,6 @@
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
-const path = require("path");
-const sharp = require("sharp");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -35,27 +33,6 @@ const upload = multer({
 module.exports.send = (req, res, next) => {
   return upload.single("userImg")(req, res, () => {
     console.log(req.file);
-    if (!req.file) {
-      return res.json({
-        message:
-          "Invalid image file type ; only accept jpeg, jpg and png (req.file === 'undefined')",
-      });
-    }
-    cloudinary.uploader.upload(req.file.path, async (err, result) => {
-      if (err) return next(err);
-      fs.unlinkSync(req.file.path); // ลบไฟล์ในโฟลเดอร์ local storage
-
-      req.imgUrl = result.secure_url;
-      next();
-    });
-  });
-};
-
-module.exports.roomIconSend = (req, res, next) => {
-  return upload.single("roomImg")(req, res, async () => {
-    // console.log(req);
-    console.log(req.file);
-    console.log(req.file.path);
     if (!req.file) {
       return res.json({
         message:
