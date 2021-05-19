@@ -3,32 +3,40 @@ const router = express.Router();
 const topicController = require("../controllers/topicController");
 const userController = require("../controllers/userController");
 
-router.get("/", userController.protectUser, topicController.getAllTopicsActive);
+router.get("/mytopic", userController.protectUser, topicController.getMyTopic); //
 router.get(
-  "/by-id/:id",
+  "/user/:userId",
   userController.protectUser,
-  topicController.getTopicByIdActive
+  topicController.getUserTopic
+); //
+router.get(
+  "/latest-topics",
+  userController.protectUser,
+  topicController.getLastestTopics
+); //
+
+router.get(
+  "/all-active",
+  userController.protectUser,
+  topicController.getAllActiveTopics
 );
 router.get(
-  "/latest-topic",
+  "/active/:id",
   userController.protectUser,
-  topicController.getLastedTopicsActive
+  topicController.getActiveTopicById
 );
 router.get(
   "/hot-topic",
   userController.protectUser,
   topicController.getHotTopicsActive
 );
+
 router.get(
   "/room/:roomId",
   userController.protectUser,
-  topicController.getToppicByRoomId
+  topicController.getActiveTopicsByRoomId
 );
-router.get(
-  "/user/:userId",
-  userController.protectUser,
-  topicController.getRoomByUserId
-);
+
 router.post("/", userController.protectUser, topicController.createTopic); //
 router.patch("/:id", userController.protectUser, topicController.updateTopic); //
 router.patch(

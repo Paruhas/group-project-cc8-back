@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       reportStatus: {
         type: DataTypes.ENUM,
-        values: ["REPORT", "REJECT", "RECONSIDER"],
+        values: ["REPORT", "REJECT"],
         defaultValue: "REPORT",
         allowNull: false,
       },

@@ -3,20 +3,15 @@ const jwt = require("jsonwebtoken");
 const { User, sequelize } = require("../models");
 const AppError = require("../utils/AppError");
 
-const isEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const isEmail =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const isPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
 
 exports.register = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const {
-      username,
-      email,
-      password,
-      confirmPassword,
-      userImg,
-      birthDate,
-    } = req.body;
+    const { username, email, password, confirmPassword, userImg, birthDate } =
+      req.body;
 
     // validation
     if (!username || !username.trim()) {
@@ -203,15 +198,8 @@ exports.protectUser = async (req, res, next) => {
 
 exports.getMe = async (req, res, next) => {
   try {
-    const {
-      id,
-      username,
-      email,
-      userImg,
-      birthDate,
-      userRole,
-      userStatus,
-    } = req.user;
+    const { id, username, email, userImg, birthDate, userRole, userStatus } =
+      req.user;
     if (userStatus === "INACTIVE")
       return res.status(400).json({ message: "This user has been deleted" });
     res.status(200).json({

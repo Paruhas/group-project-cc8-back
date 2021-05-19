@@ -1,9 +1,6 @@
 const { sequelize, Comment, Topic, User } = require("../models");
-const AppError = require("../utils/AppError");
 
-// router.get("/user/:userId");
-// router.post("/");
-// router.delete("/:id");
+const AppError = require("../utils/AppError");
 
 exports.getAllCommentByTopicId = async (req, res, next) => {
   try {
@@ -56,7 +53,8 @@ exports.createComment = async (req, res, next) => {
 
     const findTopic = await Topic.findOne({
       where: {
-        [Op.and]: [{ id: topicId }, { topicStatus: "ACTIVE" }],
+        id: topicId,
+        topicStatus: "ACTIVE",
       },
     });
     if (!findTopic) {
@@ -64,6 +62,12 @@ exports.createComment = async (req, res, next) => {
         400,
         "topicById not found ; or not have active status"
       );
+    }
+    const previousComment = await Comment.findOne({
+      where: { topicId, userId: user.id },
+    });
+    if (previousComment && previousComment.commentContent === commentContent) {
+      throw new AppError(400, "Comment are duplicated");
     }
 
     await Comment.create(
@@ -87,22 +91,42 @@ exports.createComment = async (req, res, next) => {
   }
 };
 exports.editComment = async (req, res, next) => {
-  const { id } = req.params;
-  const { topicId, commentContent } = req.body;
-  const topic = await Topic.findOne({
-    where: {
-      [Op.and]: [{ id: topicId }, { topicStatus: "ACTIVE" }],
-    },
-  });
-  if (!topic) {
-    throw new AppError(400, "topicById not found ; or not have active status");
+  try {
+    const { id } = req.params;
+    const { topicId, commentContent } = req.body;
+    const topic = await Topic.findOne({
+      where: {
+        id: topicId,
+        topicStatus: "ACTIVE",
+      },
+    });
+    if (!topic) {
+      throw new AppError(
+        400,
+        "topicById not found ; or not have active status"
+      );
+    }
+    const comment = await Comment.findOne({
+      where: {
+        id,
+        topicId,
+        userId: req.user.id,
+      },
+    });
+    console.log(comment);
+    console.log(req.user.id);
+    if (!comment) {
+      throw new AppError(400, "You cannot edit other comment");
+    }
+    // if (req.user.id !== topic.userId)
+    //   throw new AppError(400, "cannot delete other user's comment");
+    await Comment.update({ commentContent }, { where: { id } });
+    res
+      .status(201)
+      .json({ message: `Comment is edited at topic id ${topicId}` });
+  } catch (err) {
+    next(err);
   }
-  if (req.user.id !== topic.userId)
-    throw new AppError(400, "cannot delete other user's comment");
-  await Topic.update({ commentContent }, { where: { id } });
-  res
-    .status(201)
-    .json({ message: `Comment is created at topic id ${topicId}` });
 };
 
 exports.deleteComment = async (req, res, next) => {

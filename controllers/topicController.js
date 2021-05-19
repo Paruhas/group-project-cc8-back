@@ -1,4 +1,12 @@
-const { sequelize, Topic, Like, Room } = require("../models");
+const {
+  sequelize,
+  Topic,
+  Like,
+  Room,
+  Comment,
+  User,
+  Pin,
+} = require("../models");
 
 // exports.getAllTopics = async (req, res, next) => {
 //   try {
@@ -16,14 +24,30 @@ const { sequelize, Topic, Like, Room } = require("../models");
 //   }
 // };
 
-exports.getTopicById = async (req, res, next) => {
+exports.getActiveTopicById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
     const topic = await Topic.findOne({
       where: {
-        id: id,
+        id,
+        topicStatus: "ACTIVE",
       },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "createdAt"],
     });
 
     if (!topic) {
@@ -36,52 +60,217 @@ exports.getTopicById = async (req, res, next) => {
   }
 };
 
-exports.getTopicByUserId = async (req, res, next) => {
+exports.getMyTopic = async (req, res, next) => {
   try {
     const { id } = req.user;
 
-    const topics = await Topic.findOne({
+    const topics = await Topic.findAll({
       where: {
         userId: id,
+        topicStatus: "ACTIVE",
       },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "createdAt"],
+      order: [["created_at", "DESC"]],
     });
 
-    if (!topic) {
+    if (!topics) {
       return res.status(400).json({ message: "Topic not found" });
     }
+    const pin = await Pin.findAll({
+      where: { userId: req.user.id },
+      attributes: ["id", "topicId"],
+    });
 
-    res.status(200).json({ topics });
+    res.status(200).json({ topics, pin });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getActiveTopicsByRoomId = async (req, res, next) => {
+  try {
+    const { page } = req.query;
+    const { roomId } = req.user;
+
+    const topics = await Topic.findAll({
+      where: {
+        roomId,
+        topicStatus: "ACTIVE",
+      },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "createdAt"],
+      offset: 10 * (page - 1),
+      limit: 10,
+      order: [["created_at", "DESC"]],
+    });
+
+    if (!topics) {
+      return res.status(400).json({ message: "Topic not found" });
+    }
+    const pin = await Pin.findAll({
+      where: { userId: req.user.id },
+      attributes: ["id", "topicId"],
+    });
+
+    res.status(200).json({ topics, pin });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getLastedTopics = async (req, res, next) => {
+exports.getUserTopic = async (req, res, next) => {
   try {
-    const topicsLasted = await Topic.findAll({
-      where: {},
+    const { userId } = req.params;
+
+    const topics = await Topic.findAll({
+      where: {
+        userId,
+        topicStatus: "ACTIVE",
+      },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "topicContent", "createdAt"],
+      order: [["created_at", "DESC"]],
+    });
+
+    if (!topics) {
+      return res.status(400).json({ message: "Topic not found" });
+    }
+    const pin = await Pin.findAll({
+      where: { userId: req.user.id },
+      attributes: ["id", "topicId"],
+    });
+
+    res.status(200).json({ topics, pin });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getLastestTopics = async (req, res, next) => {
+  try {
+    const lastestTopics = await Topic.findAll({
+      where: {
+        topicStatus: "ACTIVE",
+      },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "createdAt"],
       limit: 4,
       order: [["created_at", "DESC"]],
     });
 
-    if (!topicsLasted) {
+    if (!lastestTopics) {
       return res.status(400).json({
         message: "topicsLasted not found",
       });
     }
+    const pin = await Pin.findAll({
+      where: { userId: req.user.id },
+      attributes: ["id", "topicId"],
+    });
 
-    res.status(200).json({ topicsLasted });
+    res.status(200).json({ lastestTopics, pin });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getAllTopicsActive = async (req, res, next) => {
+exports.getAllActiveTopics = async (req, res, next) => {
   try {
+    const { page } = req.query;
+    const allTopics = await Topic.findAll({
+      where: {
+        topicStatus: "ACTIVE",
+      },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+      ],
+      attributes: ["id", "topicName", "createdAt"],
+      order: [["created_at", "DESC"]],
+    });
+    const numberOfTopic = allTopics.length;
     const topics = await Topic.findAll({
       where: {
         topicStatus: "ACTIVE",
       },
+      include: [
+        {
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
+        },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "createdAt"],
+      offset: 10 * ((page ? page : 1) - 1),
+      limit: 10,
+      order: [["created_at", "DESC"]],
     });
 
     if (!topics) {
@@ -89,57 +278,61 @@ exports.getAllTopicsActive = async (req, res, next) => {
         .status(400)
         .json({ message: "topics not found ; or not have active status" });
     }
-
-    res.status(200).json({ topics });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.getTopicByIdActive = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    const topic = await Topic.findOne({
-      where: {
-        id: id,
-        topicStatus: "ACTIVE",
-      },
+    const pin = await Pin.findAll({
+      where: { userId: req.user.id },
+      attributes: ["id", "topicId"],
     });
 
-    if (!topic) {
-      return res
-        .status(400)
-        .json({ message: "topicById not found ; or not have active status" });
-    }
-
-    res.status(200).json({ topic });
+    res.status(200).json({ topics, numberOfTopic, pin });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getLastedTopicsActive = async (req, res, next) => {
-  try {
-    const topicsLasted = await Topic.findAll({
-      where: {
-        topicStatus: "ACTIVE",
-      },
-      limit: 4,
-      order: [["created_at", "DESC"]],
-    });
+// exports.getTopicByIdActive = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
 
-    if (!topicsLasted) {
-      return res.status(400).json({
-        message: "topicsLasted not found ; or not have active status",
-      });
-    }
+//     const topic = await Topic.findOne({
+//       where: {
+//         id: id,
+//         topicStatus: "ACTIVE",
+//       },
+//     });
 
-    res.status(200).json({ topicsLasted });
-  } catch (err) {
-    next(err);
-  }
-};
+//     if (!topic) {
+//       return res
+//         .status(400)
+//         .json({ message: "topicById not found ; or not have active status" });
+//     }
+
+//     res.status(200).json({ topic });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+// exports.getLastedTopicsActive = async (req, res, next) => {
+//   try {
+//     const topicsLasted = await Topic.findAll({
+//       where: {
+//         topicStatus: "ACTIVE",
+//       },
+//       limit: 4,
+//       order: [["created_at", "DESC"]],
+//     });
+
+//     if (!topicsLasted) {
+//       return res.status(400).json({
+//         message: "topicsLasted not found ; or not have active status",
+//       });
+//     }
+
+//     res.status(200).json({ topicsLasted });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 exports.getHotTopicsActive = async (req, res, next) => {
   try {
@@ -158,6 +351,7 @@ exports.getHotTopicsActive = async (req, res, next) => {
         [sequelize.fn("COUNT", "topic_id"), "totalLikes"],
       ],
       group: ["topic_id"],
+      attributes: ["id", "topicName", "createdAt"],
       order: [[sequelize.literal("totalLikes"), "DESC"]],
       limit: 4,
     });
@@ -174,12 +368,79 @@ exports.getHotTopicsActive = async (req, res, next) => {
   }
 };
 
-exports.getAllTopicsInactive = async (req, res, next) => {
+exports.getAllTopicsForAdmin = async (req, res, next) => {
   try {
+    const { page, topicStatus, roomStatus, userStatus } = req.query;
+
+    // const objArr = [{ topicStatus }, { roomStatus }, { userStatus }]
+    //   .filter((status) => Object.values(status)[0])
+    //   .map((obj) => Object.entries(obj))
+    //   .flat();
+    // const obj = Object.fromEntries(objArr);
+    // console.log("ARR", obj);
+
     const topics = await Topic.findAll({
-      where: {
-        topicStatus: "INACTIVE",
-      },
+      where: topicStatus ? { topicStatus } : {},
+      include: [
+        {
+          model: Room,
+          where: roomStatus ? { roomStatus } : {},
+          attributes: ["id", "roomName", "roomIcon", "roomStatus"],
+        },
+        {
+          model: User,
+          where: userStatus ? { userStatus } : {},
+          attributes: ["id", "username", "userImg", "userStatus"],
+        },
+        Comment,
+        Like,
+      ],
+      attributes: ["id", "topicName", "createdAt"],
+      offset: 10 * ((page ? page : 1) - 1),
+      limit: 10,
+      order: [["created_at", "DESC"]],
+    });
+
+    if (!topics) {
+      return res.status(400).json({
+        message: "topicsInactive not found ; or not have inactive status",
+      });
+    }
+
+    res.status(200).json({ topics });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getTopicsByIdForAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const topics = await Topic.findOne({
+      where: { id },
+      include: [
+        {
+          model: Room,
+
+          attributes: ["id", "roomName", "roomIcon", "roomStatus"],
+        },
+        {
+          model: User,
+
+          attributes: ["id", "username", "userImg", "userStatus"],
+        },
+        Comment,
+
+        Like,
+      ],
+      attributes: [
+        "id",
+        "topicName",
+        "topicContent",
+        "createdAt",
+        "topicStatus",
+      ],
+
+      order: [["created_at", "DESC"]],
     });
 
     if (!topics) {
@@ -194,28 +455,28 @@ exports.getAllTopicsInactive = async (req, res, next) => {
   }
 };
 
-exports.getTopicByIdInactive = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+// exports.getTopicByIdInactive = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
 
-    const topic = await Topic.findOne({
-      where: {
-        id: id,
-        topicStatus: "INACTIVE",
-      },
-    });
+//     const topic = await Topic.findOne({
+//       where: {
+//         id: id,
+//         topicStatus: "INACTIVE",
+//       },
+//     });
 
-    if (!topic) {
-      return res.status(400).json({
-        message: "topicByIdInactive not found ; or not have inactive status",
-      });
-    }
+//     if (!topic) {
+//       return res.status(400).json({
+//         message: "topicByIdInactive not found ; or not have inactive status",
+//       });
+//     }
 
-    res.status(200).json({ topic });
-  } catch (err) {
-    next(err);
-  }
-};
+//     res.status(200).json({ topic });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 exports.updateTopic = async (req, res, next) => {
   try {

@@ -25,6 +25,7 @@ exports.getAllPinActiveByUserId = async (req, res, next) => {
           where: {
             topicStatus: "ACTIVE",
           },
+          attributes: ["id", "topicName"],
         },
       ],
     });

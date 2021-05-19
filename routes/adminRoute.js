@@ -58,14 +58,14 @@ router.patch(
 ); //
 
 router.get(
-  "/topics/inactive",
+  "/topics",
   userController.protectAdmin,
-  topicController.getAllTopicsInactive
+  topicController.getAllTopicsForAdmin
 ); //
 router.get(
-  "/topics/inactive/:id",
+  "/topics/:id",
   userController.protectAdmin,
-  topicController.getTopicByIdInactive
+  topicController.getTopicsByIdForAdmin
 ); //
 router.patch(
   "/topics/active-inactive/:id",
@@ -89,7 +89,7 @@ router.post(
   reportController.createReport
 );
 router.patch(
-  "/report/status/:id",
+  "/report/:id",
   userController.protectAdmin,
   reportController.updateReportStatus
 );
