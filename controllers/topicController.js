@@ -640,6 +640,7 @@ exports.createTopic = async (req, res, next) => {
     });
     if (!topicName)
       return res.status(400).json({ message: "Topic name is required " });
+    
     if (!topicContent)
       return res
         .status(400)

@@ -10,25 +10,16 @@ const userRoute = require("./routes/userRoute");
 const roomRoute = require("./routes/roomRoute");
 const topicRoute = require("./routes/topicRoute");
 const pinRoute = require("./routes/pinRoute");
+const likeRoute = require("./routes/likeRoute");
+const uploadRoute = require("./routes/uploadRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
-// test upload SingleImage middleware "Multer"
-const multer = require("./middlewares/multer");
-
-app.post("/test-upload", multer.send, async (req, res, next) => {
-  try {
-    console.log(req, "app");
-    console.log(req.imgUrl, "app-Image");
-    res.status(200).json({ message: "test", img: req.imgUrl });
-  } catch (err) {
-    next(err);
-  }
-}); //
-
 const userController = require("./controllers/userController");
+
+app.use("/upload", uploadRoute);
 
 app.post("/login", userController.login); //
 app.post("/register", userController.register); //
@@ -39,6 +30,8 @@ app.use("/user", userRoute);
 app.use("/room", roomRoute);
 app.use("/topic", topicRoute);
 app.use("/pin", pinRoute);
+app.use("/like", likeRoute);
+app.get("/like", userController.getLike);
 
 app.use((req, res, next) => {
   try {
