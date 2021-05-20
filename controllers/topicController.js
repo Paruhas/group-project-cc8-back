@@ -420,7 +420,7 @@ exports.getAllTopicsForAdmin = async (req, res, next) => {
         Comment,
         Like,
       ],
-      attributes: ["id", "topicName", "createdAt"],
+      attributes: ["id", "topicName", "createdAt", "topicStatus", "topicImg"],
       offset: 10 * ((page ? page : 1) - 1),
       limit: 10,
       order: [["created_at", "DESC"]],

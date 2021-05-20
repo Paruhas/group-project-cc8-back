@@ -1,5 +1,6 @@
 const { Report, Topic, Room, User } = require("../models");
 const { report } = require("../routes/roomRoute");
+
 exports.getAllReports = async (req, res, next) => {
   try {
     const reports = await Report.findAll({
