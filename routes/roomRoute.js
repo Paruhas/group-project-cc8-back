@@ -5,7 +5,7 @@ const userController = require("../controllers/userController");
 
 router.get(
   "/active",
-  userController.protectUser,
+  // userController.protectUser,
   roomController.getAllActiveRooms
 ); //
 router.get(
