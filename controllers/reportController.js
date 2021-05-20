@@ -21,7 +21,7 @@ exports.getAllReports = async (req, res, next) => {
           attributes: ["id", "username", "userImg", "userStatus"],
         },
       ],
-      order: [["createdAt", "desc"]],
+      order: [["id", "desc"]],
     });
     res.status(200).json({ reports });
   } catch (err) {

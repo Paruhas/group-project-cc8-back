@@ -296,7 +296,7 @@ exports.deleteMe = async (req, res, next) => {
 };
 exports.getAllUser = async (req, res, next) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({ order: [["id", "DESC"]] });
     if (!users) return res.status(400).json({ message: "User not found" });
     res.status(200).json({ users });
   } catch (err) {
