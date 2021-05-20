@@ -6,6 +6,7 @@ const {
   Comment,
   User,
   Pin,
+  Report,
 } = require("../models");
 
 // exports.getAllTopics = async (req, res, next) => {
@@ -44,10 +45,16 @@ exports.getActiveTopicById = async (req, res, next) => {
           where: { userStatus: "ACTIVE" },
           attributes: ["id", "username", "userImg"],
         },
-        Comment,
-        Like,
+        {
+          model: Comment,
+          include: [{ model: User, attributes: ["id", "username", "userImg"] }],
+        },
+        {
+          model: Like,
+          include: [{ model: User, attributes: ["id", "userName", "userImg"] }],
+        },
+        Report,
       ],
-      attributes: ["id", "topicName", "createdAt"],
     });
 
     if (!topic) {

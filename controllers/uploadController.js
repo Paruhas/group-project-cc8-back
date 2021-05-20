@@ -1,6 +1,6 @@
 const { sequelize } = require("../models");
 
-exports.uploadUserImage = async (req, res, next) => {
+exports.uploadImage = async (req, res, next) => {
   try {
     // console.log(req, "app");
     // console.log(req.imgUrl, "app-Image");
