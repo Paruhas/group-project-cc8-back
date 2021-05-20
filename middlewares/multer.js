@@ -31,14 +31,14 @@ const upload = multer({
 });
 
 module.exports.send = (req, res, next) => {
-  return upload.single("userImg")(req, res, () => {
+  return upload.single("image")(req, res, () => {
     console.log(req.file);
-    if (!req.file) {
-      return res.json({
+    if (!req.file)
+      return res.status(400).json({
         message:
           "Invalid image file type ; only accept jpeg, jpg and png (req.file === 'undefined')",
       });
-    }
+
     cloudinary.uploader.upload(req.file.path, async (err, result) => {
       if (err) return next(err);
       fs.unlinkSync(req.file.path); // ลบไฟล์ในโฟลเดอร์ local storage

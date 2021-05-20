@@ -5,12 +5,12 @@ const userController = require("../controllers/userController");
 
 router.get(
   "/active",
-  userController.protectUser,
+
   roomController.getAllActiveRooms
 ); //
 router.get(
   "/active/:id",
-  userController.protectUser,
+
   roomController.getActiveRoomById
 ); //
 

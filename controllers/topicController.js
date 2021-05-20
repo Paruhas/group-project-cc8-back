@@ -90,6 +90,7 @@ exports.getMyTopic = async (req, res, next) => {
     if (!topics) {
       return res.status(400).json({ message: "Topic not found" });
     }
+
     const pin = await Pin.findAll({
       where: { userId: req.user.id },
       attributes: ["id", "topicId"],
@@ -102,8 +103,7 @@ exports.getMyTopic = async (req, res, next) => {
 };
 exports.getActiveTopicsByRoomId = async (req, res, next) => {
   try {
-    const { page } = req.query;
-    const { roomId } = req.user;
+    const { page, roomId } = req.query;
 
     const topics = await Topic.findAll({
       where: {
@@ -113,7 +113,7 @@ exports.getActiveTopicsByRoomId = async (req, res, next) => {
       include: [
         {
           model: Room,
-          where: { roomStatus: "ACTIVE" },
+          where: { roomId, roomStatus: "ACTIVE" },
           attributes: ["id", "roomName", "roomIcon"],
         },
         {
@@ -133,8 +133,9 @@ exports.getActiveTopicsByRoomId = async (req, res, next) => {
     if (!topics) {
       return res.status(400).json({ message: "Topic not found" });
     }
+
     const pin = await Pin.findAll({
-      where: { userId: req.user.id },
+      where: req.user ? { userId: req.user.id } : {},
       attributes: ["id", "topicId"],
     });
 
@@ -175,7 +176,7 @@ exports.getUserTopic = async (req, res, next) => {
       return res.status(400).json({ message: "Topic not found" });
     }
     const pin = await Pin.findAll({
-      where: { userId: req.user.id },
+      where: req.user ? { userId: req.user.id } : {},
       attributes: ["id", "topicId"],
     });
 
@@ -216,7 +217,7 @@ exports.getLastestTopics = async (req, res, next) => {
       });
     }
     const pin = await Pin.findAll({
-      where: { userId: req.user.id },
+      where: req.user ? { userId: req.user.id } : {},
       attributes: ["id", "topicId"],
     });
 
@@ -279,7 +280,7 @@ exports.getAllActiveTopics = async (req, res, next) => {
         .json({ message: "topics not found ; or not have active status" });
     }
     const pin = await Pin.findAll({
-      where: { userId: req.user.id },
+      where: req.user ? { userId: req.user.id } : {},
       attributes: ["id", "topicId"],
     });
 
@@ -336,33 +337,50 @@ exports.getAllActiveTopics = async (req, res, next) => {
 
 exports.getHotTopicsActive = async (req, res, next) => {
   try {
-    const topicsHot = await Like.findAll({
+    const topics = await Topic.findAll({
+      where: {
+        topicStatus: "ACTIVE",
+      },
       include: [
         {
-          model: Topic,
-          attributes: [],
-          where: {
-            topicStatus: "ACTIVE",
-          },
+          model: Room,
+          where: { roomStatus: "ACTIVE" },
+          attributes: ["id", "roomName", "roomIcon"],
         },
+        {
+          model: User,
+          where: { userStatus: "ACTIVE" },
+          attributes: ["id", "username", "userImg"],
+        },
+        Comment,
+        Like,
       ],
-      attributes: [
-        "topic_id",
-        [sequelize.fn("COUNT", "topic_id"), "totalLikes"],
-      ],
-      group: ["topic_id"],
       attributes: ["id", "topicName", "createdAt"],
-      order: [[sequelize.literal("totalLikes"), "DESC"]],
-      limit: 4,
+
+      order: [["created_at", "DESC"]],
     });
 
-    if (!topicsHot) {
-      return res.status(400).json({
-        message: "topicsHot not found ; or not have active status",
-      });
-    }
+    if (!topics.length)
+      return res.status(400).json({ message: "Topic not found." });
+    const parseTopics = JSON.parse(JSON.stringify(topics));
+    const topicss = parseTopics.map((topic) => {
+      const timenow = new Date().setHours(00, 00, 00);
+      const timetoppicpost = new Date(topic.createdAt).setHours(00, 00, 00);
 
-    res.status(200).json({ topicsHot });
+      const day = Math.floor((timenow - timetoppicpost) / 86400000);
+      const score =
+        (topic.Comments.length / day) * 65 + (topic.Likes.length / day) * 35;
+      console.log(score);
+      return { ...topic, score };
+    });
+
+    topicss.sort((a, b) => b.score - a.score);
+    const pin = await Pin.findAll({
+      where: req.user ? { userId: req.user.id } : {},
+      attributes: ["id", "topicId"],
+    });
+
+    res.status(200).json({ topicss, pin });
   } catch (err) {
     next(err);
   }
@@ -640,7 +658,7 @@ exports.createTopic = async (req, res, next) => {
     });
     if (!topicName)
       return res.status(400).json({ message: "Topic name is required " });
-    
+
     if (!topicContent)
       return res
         .status(400)

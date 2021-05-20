@@ -27,10 +27,10 @@ app.post("/register", userController.register); //
 app.use("/admin", adminRoute);
 
 app.use("/user", userRoute);
-app.use("/room", roomRoute);
-app.use("/topic", topicRoute);
-app.use("/pin", pinRoute);
-app.use("/like", likeRoute);
+app.use("/rooms", roomRoute);
+app.use("/topics", topicRoute);
+app.use("/pins", pinRoute);
+app.use("/likes", likeRoute);
 app.get("/like", userController.getLike);
 
 app.use((req, res, next) => {

@@ -26,7 +26,7 @@ router.get(
   topicController.getActiveTopicById
 );
 router.get(
-  "/hot-topic",
+  "/hot-topics",
 
   topicController.getHotTopicsActive
 );
