@@ -70,7 +70,7 @@ exports.createComment = async (req, res, next) => {
       throw new AppError(400, "Comment are duplicated");
     }
 
-    await Comment.create(
+    const comment = await Comment.create(
       {
         commentContent,
         userId: user.id,
@@ -84,7 +84,7 @@ exports.createComment = async (req, res, next) => {
     await transaction.commit();
     res
       .status(201)
-      .json({ message: `Comment is updated at topic id ${topicId}` });
+      .json({ message: `Comment is updated at topic id ${topicId}`, comment });
   } catch (err) {
     await transaction.rollback();
     next(err);

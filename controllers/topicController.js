@@ -374,7 +374,7 @@ exports.getHotTopicsActive = async (req, res, next) => {
       const timenow = new Date().setHours(00, 00, 00);
       const timetoppicpost = new Date(topic.createdAt).setHours(00, 00, 00);
 
-      const day = Math.floor((timenow - timetoppicpost) / 86400000);
+      const day = Math.floor((timenow - timetoppicpost) / 86400000) + 1;
       const score =
         (topic.Comments.length / day) * 65 + (topic.Likes.length / day) * 35;
       console.log(score);

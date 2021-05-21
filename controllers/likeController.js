@@ -28,10 +28,13 @@ exports.createLike = async (req, res, next) => {
 exports.deleteLike = async (req, res, next) => {
   try {
     const { topicId } = req.params;
-    const prviousLike = await Like.findOne({ where: { id: topicId } });
-    if (!prviousLike)
+    const prviousLike = await Like.findOne({
+      where: { topicId: topicId, userId: req.user.id },
+    });
+    console.log(JSON.parse(JSON.stringify(prviousLike)));
+    if (prviousLike === {})
       return res.status(400).json({ message: "Like not found." });
-    console.log(prviousLike.userId, req.user.id);
+    console.log(JSON.parse(JSON.stringify(prviousLike)).userId, req.user.id);
     console.log(req.user);
     if (prviousLike.userId !== req.user.id)
       return res
@@ -43,7 +46,7 @@ exports.deleteLike = async (req, res, next) => {
         userId: req.user.id,
       },
     });
-    res.status(204).json({ message: "Unlike success." });
+    res.status(204).json({ unlike });
   } catch (err) {
     next(err);
   }
