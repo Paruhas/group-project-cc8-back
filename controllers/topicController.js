@@ -110,7 +110,11 @@ exports.getMyTopic = async (req, res, next) => {
 };
 exports.getActiveTopicsByRoomId = async (req, res, next) => {
   try {
-    const { page, roomId } = req.query;
+    const { roomId } = req.params;
+    const { page } = req.query;
+
+    // console.log(roomId);
+    // console.log(page);
 
     const topics = await Topic.findAll({
       where: {
@@ -120,7 +124,7 @@ exports.getActiveTopicsByRoomId = async (req, res, next) => {
       include: [
         {
           model: Room,
-          where: { roomId, roomStatus: "ACTIVE" },
+          where: { id: roomId, roomStatus: "ACTIVE" },
           attributes: ["id", "roomName", "roomIcon"],
         },
         {
