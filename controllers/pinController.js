@@ -26,6 +26,12 @@ exports.getAllPinActiveByUserId = async (req, res, next) => {
             topicStatus: "ACTIVE",
           },
           attributes: ["id", "topicName"],
+          include: [
+            {
+              model: User,
+              where: { userStatus: "ACTIVE" },
+            },
+          ],
         },
       ],
     });
