@@ -54,6 +54,7 @@ exports.getActiveTopicById = async (req, res, next) => {
           include: [{ model: User, attributes: ["id", "userName", "userImg"] }],
         },
         Report,
+        Pin,
       ],
     });
 
@@ -134,6 +135,7 @@ exports.getActiveTopicsByRoomId = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
       offset: 10 * (page - 1),
@@ -178,6 +180,7 @@ exports.getUserTopic = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "topicContent", "createdAt"],
       order: [["created_at", "DESC"]],
@@ -216,6 +219,7 @@ exports.getLastestTopics = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
       limit: 4,
@@ -278,6 +282,7 @@ exports.getAllActiveTopics = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
       offset: 10 * ((page ? page : 1) - 1),
@@ -365,6 +370,7 @@ exports.getHotTopicsActive = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
 
@@ -423,6 +429,7 @@ exports.getAllTopicsForAdmin = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "createdAt", "topicStatus", "topicImg"],
       offset: 10 * ((page ? page : 1) - 1),
@@ -458,8 +465,8 @@ exports.getTopicsByIdForAdmin = async (req, res, next) => {
           attributes: ["id", "username", "userImg", "userStatus"],
         },
         Comment,
-
         Like,
+        Pin,
       ],
       attributes: [
         "id",

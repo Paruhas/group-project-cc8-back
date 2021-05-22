@@ -83,9 +83,35 @@ exports.createPin = async (req, res, next) => {
         transaction: transaction,
       }
     );
+    const createdPin = JSON.parse(JSON.stringify(newPin));
+    // const pin = await Pin.findAll(
+    //   {
+    //     where: {
+    //       id: +createdPin.id,
+    //     },
+    // include: [
+    //   {
+    //     model: Topic,
+    //     where: {
+    //       topicStatus: "ACTIVE",
+    //     },
+    //     attributes: ["id", "topicName"],
+    //     include: [
+    //       {
+    //         model: User,
+    //         where: { userStatus: "ACTIVE" },
+    //       },
+    //     ],
+    //   },
+    // ],
+    //   },
+    //   {
+    //     transaction: transaction,
+    //   }
+    // );
 
     await transaction.commit();
-    res.status(201).json({ newPin });
+    res.status(201).json({ pin: newPin });
   } catch (err) {
     await transaction.rollback();
     next(err);
