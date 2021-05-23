@@ -90,6 +90,7 @@ exports.getMyTopic = async (req, res, next) => {
         },
         Comment,
         Like,
+        Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
       order: [["created_at", "DESC"]],
@@ -244,7 +245,7 @@ exports.getLastestTopics = async (req, res, next) => {
 
 exports.getAllActiveTopics = async (req, res, next) => {
   try {
-    const { page } = req.query;
+    // const { page } = req.query;
     const allTopics = await Topic.findAll({
       where: {
         topicStatus: "ACTIVE",
@@ -285,8 +286,8 @@ exports.getAllActiveTopics = async (req, res, next) => {
         Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
-      offset: 10 * ((page ? page : 1) - 1),
-      limit: 10,
+      // offset: 10 * ((page ? page : 1) - 1),
+      // limit: 10,
       order: [["created_at", "DESC"]],
     });
 
