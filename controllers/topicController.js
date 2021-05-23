@@ -223,7 +223,7 @@ exports.getLastestTopics = async (req, res, next) => {
         Pin,
       ],
       attributes: ["id", "topicName", "createdAt"],
-      limit: 4,
+      limit: 5,
       order: [["created_at", "DESC"]],
     });
 
@@ -381,7 +381,7 @@ exports.getHotTopicsActive = async (req, res, next) => {
     if (!topics.length)
       return res.status(400).json({ message: "Topic not found." });
     const parseTopics = JSON.parse(JSON.stringify(topics));
-    const topicss = parseTopics.map((topic) => {
+    const topicsss = parseTopics.map((topic) => {
       const timenow = new Date().setHours(00, 00, 00);
       const timetoppicpost = new Date(topic.createdAt).setHours(00, 00, 00);
 
@@ -392,11 +392,12 @@ exports.getHotTopicsActive = async (req, res, next) => {
       return { ...topic, score };
     });
 
-    topicss.sort((a, b) => b.score - a.score);
+    topicsss.sort((a, b) => b.score - a.score);
     const pin = await Pin.findAll({
       where: req.user ? { userId: req.user.id } : {},
       attributes: ["id", "topicId"],
     });
+    const topicss = topicsss.slice(0, 5);
 
     res.status(200).json({ topicss, pin });
   } catch (err) {
