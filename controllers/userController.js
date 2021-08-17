@@ -3,24 +3,22 @@ const jwt = require("jsonwebtoken");
 const { User, sequelize } = require("../models");
 const AppError = require("../utils/AppError");
 
-const isEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const isPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/;
+const isEmail =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const isPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
 
 exports.register = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const {
-      username,
-      email,
-      password,
-      confirmPassword,
-      userImg,
-      birthDate,
-    } = req.body;
+    const { username, email, password, confirmPassword, userImg, birthDate } =
+      req.body;
 
     // validation
     if (!username || !username.trim()) {
       throw new AppError(400, "username is required");
+    }
+    if (!isEmail) {
+      throw new AppError(400, "Email is required.");
     }
     if (!isEmail.test(email)) {
       throw new AppError(400, "this email is invalid format");
@@ -108,10 +106,13 @@ exports.login = async (req, res, next) => {
       },
     });
 
-    if (!loginUser) {
+    if (!loginUser)
       return res.status(400).json({ message: "email or password incorrect" });
-    }
 
+    if (loginUser.userStatus === "INACTIVE")
+      return res.status(400).json({ message: "This user was deleted." });
+    if (loginUser.userStatus === "BANNED")
+      return res.status(400).json({ message: "This user has been banned." });
     const isPasswordMatch = await bcrypt.compare(password, loginUser.password);
     if (!isPasswordMatch) {
       return res.status(400).json({ message: "email or password incorrect" });
@@ -174,8 +175,9 @@ exports.protectUser = async (req, res, next) => {
     ) {
       token = req.headers.authorization.split(" ")[1];
     }
-    if (!token)
+    if (!token) {
       return res.status(401).json({ message: "you are unauthorized" });
+    }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({
@@ -185,8 +187,8 @@ exports.protectUser = async (req, res, next) => {
     });
     if (!user) return res.status(401).json({ message: "user not found" });
 
-    if (user.userRole !== "USER")
-      return res.status(400).json({ message: "You are unauthorized" });
+    // if (user.userRole !== "USER")
+    //   return res.status(400).json({ message: "You are unauthorized" });
 
     req.user = user;
     next();
@@ -197,15 +199,8 @@ exports.protectUser = async (req, res, next) => {
 
 exports.getMe = async (req, res, next) => {
   try {
-    const {
-      id,
-      username,
-      email,
-      userImg,
-      birthDate,
-      userRole,
-      userStatus,
-    } = req.user;
+    const { id, username, email, userImg, birthDate, userRole, userStatus } =
+      req.user;
     if (userStatus === "INACTIVE")
       return res.status(400).json({ message: "This user has been deleted" });
     res.status(200).json({
@@ -259,12 +254,13 @@ exports.updateMe = async (req, res, next) => {
 exports.editMyPassword = async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { newPassword, confirmNewPassword } = req.body;
-    if (newPassword !== confirmNewPassword)
+    const { password, confirmPassword } = req.body;
+    if (password !== confirmPassword)
       return res.status(400).json({ message: "Password is not match" });
 
     const regexPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
-    const isPassword = regexPassword.test(String(newPassword));
+
+    const isPassword = regexPassword.test(password);
     if (!isPassword)
       return res.status(400).json({
         message:
@@ -272,7 +268,7 @@ exports.editMyPassword = async (req, res, next) => {
       });
 
     const hashedPassword = await bcrypt.hash(
-      newPassword,
+      password,
       +process.env.BCRYPT_SALT
     );
 
@@ -286,9 +282,11 @@ exports.editMyPassword = async (req, res, next) => {
 };
 exports.deleteMe = async (req, res, next) => {
   try {
-    const { id, userStatus } = req.user;
+    const { id, userRole, userStatus } = req.user;
     if (userStatus === "INACTIVE")
       return res.status(400).json({ message: "This user has been deleted" });
+    if (userRole === "ADMIN")
+      return res.status(400).json({ message: "Cannot delelte admin." });
 
     await User.update({ userStatus: "INACTIVE" }, { where: { id } });
     res.status(200).json({ message: "This user is deleted successfully" });
@@ -296,18 +294,20 @@ exports.deleteMe = async (req, res, next) => {
     next(err);
   }
 };
-exports.getUser = async (req, res, next) => {
+exports.getAllUser = async (req, res, next) => {
   try {
-    const user = await User.findAll();
-    res.status(200).json({ user });
+    const users = await User.findAll({ order: [["id", "DESC"]] });
+    if (!users) return res.status(400).json({ message: "User not found" });
+    res.status(200).json({ users });
   } catch (err) {
     next(err);
   }
 };
 exports.getUserById = async (req, res, next) => {
   try {
-    const getUserById = await User.findByPk(req.params.id);
-    res.status(200).json({ getUserById });
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(400).json({ message: "User not found" });
+    res.status(200).json({ user });
   } catch (err) {
     next(err);
   }
@@ -316,9 +316,23 @@ exports.editUserStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { userStatus } = req.body;
+    const user = await User.findOne({ where: { id } });
+    if (!user) return res.status(400).json({ message: "User not found." });
+    if (user.userRole === "ADMIN")
+      return res
+        .status(400)
+        .json({ message: "Cannot change status of admin." });
     await User.update({ userStatus: userStatus }, { where: { id } });
-    res.status(200).json({ editStatus });
+    res
+      .status(200)
+      .json({ message: `User status with ID ${id} is updated successfully.` });
   } catch (err) {
     next(err);
   }
+};
+
+exports.getLike = async (req, res, next) => {
+  const { id } = req.body;
+  const getLike = await User.findAndCountAll({ where: { userStatus: id } });
+  res.status(200).json(getLike.count);
 };

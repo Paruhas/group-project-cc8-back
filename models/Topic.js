@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       topicContent: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(15000),
         allowNull: false,
       },
       topicImg: {
@@ -42,6 +42,14 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "RESTRICT",
     });
     Topic.hasMany(models.Report, {
+      foreignKey: {
+        name: "topicId",
+        allowNull: false,
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
+    Topic.hasMany(models.Comment, {
       foreignKey: {
         name: "topicId",
         allowNull: false,
