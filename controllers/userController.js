@@ -254,11 +254,28 @@ exports.updateMe = async (req, res, next) => {
 exports.editMyPassword = async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { password, confirmPassword } = req.body;
+    const { oldPassword, password, confirmPassword } = req.body;
     if (password !== confirmPassword)
       return res.status(400).json({ message: "Password is not match" });
 
+    if (!oldPassword || !oldPassword.trim())
+      return res.status(400).json({ message: "Old Password is required." });
+
+    if (!password || !password.trim())
+      return res.status(400).json({ message: "Password is required." });
+
     const regexPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
+
+    const user = await User.findOne({ where: { id } });
+    if (!user) return res.status(400).json({ message: "User not found." });
+
+    const isOldPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isOldPasswordMatch) {
+      return res.status(400).json({
+        message: "Incorrect Old Password",
+      });
+    }
 
     const isPassword = regexPassword.test(password);
     if (!isPassword)
@@ -272,8 +289,6 @@ exports.editMyPassword = async (req, res, next) => {
       +process.env.BCRYPT_SALT
     );
 
-    const user = await User.findOne({ where: { id } });
-    if (!user) return res.status(400).json({ message: "User not found." });
     await User.update({ password: hashedPassword }, { where: { id } });
     res.status(200).json({ message: `Password is updated.` });
   } catch (err) {
